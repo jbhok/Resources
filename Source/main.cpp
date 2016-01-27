@@ -23,10 +23,59 @@
 
 using namespace std;
 
+int bkgdSpeed=100;
+
+SDL_Rect bkgd1Pos, bkgd2Pos;
+
+float BG1pos_X = 0, BG1pos_Y = 0;
+float BG2pos_X = 0, BG2pos_Y = -768;
+
+
 //code for frame rate independence
 float deltaTime = 0.0;
 int thisTime=0;
 int lastTime=0;
+
+//move the background
+void UpdateBackground(){
+
+	//Update
+
+					//Update background 1
+
+
+
+
+					BG1pos_Y+=(bkgdSpeed*1)*deltaTime;
+
+					//set the new bkgd1 position
+					bkgd1Pos.y=(int)(BG1pos_Y+0.5f);
+
+					//reset when of the bottom of the screen
+					if(bkgd1Pos.y >= 768){
+
+						bkgd1Pos.y = -768;
+
+						BG1pos_Y= bkgd1Pos.y;
+
+					}
+					//Update background 2
+					BG2pos_Y+=(bkgdSpeed*1)*deltaTime;
+
+					//set the new bkgd1 position
+					bkgd2Pos.y=(int)(BG2pos_Y+0.5f);
+
+					//reset when of the bottom of the screen
+					if(bkgd2Pos.y >= 768){
+
+					bkgd2Pos.y = -768;
+
+					BG2pos_Y= bkgd2Pos.y;
+
+									}
+
+}
+
 
 int main(int argc, char* argv[]) {
 
@@ -35,7 +84,7 @@ int main(int argc, char* argv[]) {
 	//get the current working directory
 	string s_cwd(getcwd(NULL, 0));
 	//create a string linking to the mac's images folder
-	string s_cwd_images = s_cwd + "Resources/Images";
+	string s_cwd_images = s_cwd + "/Resources/Images/";
 
 	cout << s_cwd_images << endl;
 
@@ -78,6 +127,8 @@ int main(int argc, char* argv[]) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	//***********Create Background********
+
+
 	string BKGDpath = s_cwd_images + "/temp.png";
 
 	SDL_Surface*surface = IMG_Load(BKGDpath.c_str());
@@ -89,16 +140,16 @@ int main(int argc, char* argv[]) {
 	bkgd1=SDL_CreateTextureFromSurface(renderer, surface);
 
 	//create a SDL texture
-		SDL_Texture*bkgd2;
+	SDL_Texture*bkgd2;
 
-		//place surgace info into the texture bkgd1
-		bkgd2=SDL_CreateTextureFromSurface(renderer, surface);
+	//place surgace info into the texture bkgd1
+	bkgd2=SDL_CreateTextureFromSurface(renderer, surface);
 
 	//free the SDL surface
 	SDL_FreeSurface(surface);
 
 	//create the SDL_Recrtangle for texture
-	SDL_Rect bkgd1Pos;
+
 
 	//set the X, Y, W, and H for the Rectabngle
 	bkgd1Pos.x = 0;
@@ -106,23 +157,20 @@ int main(int argc, char* argv[]) {
 	bkgd1Pos.w = 1024;
 	bkgd1Pos.h = 768;
 
-	//create the SDL_Recrtangle for texture
-		SDL_Rect bkgd2Pos;
-
 		//set the X, Y, W, and H for the Rectabngle
-		bkgd1Pos.x = 0;
-		bkgd1Pos.y = -768;
-		bkgd1Pos.w = 1024;
-		bkgd1Pos.h = 768;
+		bkgd2Pos.x = 0;
+		bkgd2Pos.y = -768;
+		bkgd2Pos.w = 1024;
+		bkgd2Pos.h = 768;
 
 //set speed for background
-	int bkgdSpeed = 100;
+	//int bkgdSpeed = 100;
 
 	//set temp variables to hold movement
-	float BG1pos_X=0, BG1pos_Y=0;
+	//float BG1pos_X=0, BG1pos_Y=0;
 
-	float BG2pos_X=0, BG2pos_Y=-768;
-
+	//float BG2pos_X=0, BG2pos_Y=-768;
+//**************CREATE BACKGROUNDS- END******************
 
 	//***********CREATE CURSOR***********
 
@@ -254,39 +302,9 @@ int main(int argc, char* argv[]) {
 				}
 
 				//Update
-
-				//Update background 1
-
-				BG1pos_Y+=(bkgdSpeed*1)*deltaTime;
-
-				//set the new bkgd1 position
-				bkgd1Pos.y=(int)(BG1pos_Y+0.5f);
-
-				//reset when of the bottom of the screen
-				if(bkgd1Pos.y >= 768){
-
-					bkgd1Pos.y = -768;
-
-					BG1pos_Y= bkgd1Pos.y;
-
-				}
-				//Update background 2
-				BG2pos_Y+=(bkgdSpeed*1)*deltaTime;
-
-				//set the new bkgd1 position
-				bkgd2Pos.y=(int)(BG2pos_Y+0.5f);
-
-				//reset when of the bottom of the screen
-				if(bkgd2Pos.y >= 768){
-
-				bkgd2Pos.y = -768;
-
-				BG2pos_Y= bkgd2Pos.y;
-
-								}
+				UpdateBackground();
 
 				//start Drawing
-
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
