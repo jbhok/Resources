@@ -172,10 +172,153 @@ int main(int argc, char* argv[]) {
 	//float BG2pos_X=0, BG2pos_Y=-768;
 //**************CREATE BACKGROUNDS- END******************
 
+//**************CREATE MENU BUtTONS START****************
+
+		//******TITLE START ******
+		string Titlepath = s_cwd_images + "/title.png";
+
+			surface = IMG_Load(Titlepath.c_str());
+
+			//create a SDL texture
+			SDL_Texture*title;
+
+			//place surgace info into the texture bkgd1
+			title=SDL_CreateTextureFromSurface(renderer, surface);
+
+			SDL_FreeSurface(surface);
+
+			SDL_Rect titlePos;
+			//set the X, Y, W, and H for the Rectabngle
+				titlePos.x = 42;
+				titlePos.y = 55;
+				titlePos.w = 138;
+				titlePos.h = 53;
+		//*****TITLE END********
+				//******1P START ******
+					string Ppath = s_cwd_images + "/player1.png";
+
+					surface = IMG_Load(Ppath.c_str());
+
+					//create a SDL texture
+					SDL_Texture*players1N;
+
+					//place surgace info into the texture bkgd1
+					players1N=SDL_CreateTextureFromSurface(renderer, surface);
+
+					SDL_FreeSurface(surface);
+					string Pdownpath = s_cwd_images + "/player1down.png";
+
+					surface = IMG_Load(Pdownpath.c_str());
+
+					//create a SDL texture
+					SDL_Texture*players1down;
+
+					//place surgace info into the texture bkgd1
+					players1down=SDL_CreateTextureFromSurface(renderer, surface);
+
+						SDL_Rect players1NPos;
+						//set the X, Y, W, and H for the Rectabngle
+							players1NPos.x = 42;
+							players1NPos.y = 166;
+							players1NPos.w = 271;
+							players1NPos.h = 67 ;
+		//***************1p END*********
+
+		//**************2P START ******
+							string Ptwopath = s_cwd_images + "/player2.png";
+
+							surface = IMG_Load(Ptwopath.c_str());
+
+							//create a SDL texture
+							SDL_Texture*players2N;
+
+							//place surgace info into the texture bkgd1
+							players2N=SDL_CreateTextureFromSurface(renderer, surface);
+
+							SDL_FreeSurface(surface);
+							string Ptwodownpath = s_cwd_images + "/player2down.png";
+
+							surface = IMG_Load(Ptwodownpath.c_str());
+
+							//create a SDL texture
+							SDL_Texture*players2down;
+
+							//place surgace info into the texture bkgd1
+							players2down=SDL_CreateTextureFromSurface(renderer, surface);
+
+							SDL_Rect players2NPos;
+							//set the X, Y, W, and H for the Rectabngle
+							players2NPos.x = 42;
+							players2NPos.y = 275;
+							players2NPos.w = 276;
+							players2NPos.h = 67 ;
+							//***************1p END*********
+
+
+							//*************INSTRUCTIONS START ******
+							string Instpath = s_cwd_images + "/instructions.png";
+
+							surface = IMG_Load(Instpath.c_str());
+
+							//create a SDL texture
+							SDL_Texture*instructN;
+
+							//place surgace info into the texture bkgd1
+							instructN=SDL_CreateTextureFromSurface(renderer, surface);
+
+							SDL_FreeSurface(surface);
+							string Instdownpath = s_cwd_images + "/instructionsdown.png";
+
+							surface = IMG_Load(Instdownpath.c_str());
+
+							//create a SDL texture
+							SDL_Texture*instructdown;
+
+							//place surgace info into the texture bkgd1
+							instructdown=SDL_CreateTextureFromSurface(renderer, surface);
+
+							SDL_Rect instructNPos;
+							//set the X, Y, W, and H for the Rectabngle
+							instructNPos.x = 42;
+							instructNPos.y = 384;
+							instructNPos.w = 410;
+							instructNPos.h = 53 ;
+							//***************INSTRUCTIONS END*********
+
+							//*************Quit START ******
+														string Quitpath = s_cwd_images + "/quit.png";
+
+														surface = IMG_Load(Quitpath.c_str());
+
+														//create a SDL texture
+														SDL_Texture*quitN;
+
+														//place surgace info into the texture bkgd1
+														quitN=SDL_CreateTextureFromSurface(renderer, surface);
+
+														SDL_FreeSurface(surface);
+														string Quitdownpath = s_cwd_images + "/quitdown.png";
+
+														surface = IMG_Load(Quitdownpath.c_str());
+
+														//create a SDL texture
+														SDL_Texture*quitdown;
+
+														//place surgace info into the texture bkgd1
+														quitdown=SDL_CreateTextureFromSurface(renderer, surface);
+
+														SDL_Rect quitNPos;
+														//set the X, Y, W, and H for the Rectabngle
+														quitNPos.x = 42;
+														quitNPos.y = 493;
+														quitNPos.w = 143;
+														quitNPos.h = 60 ;
+														//***************INSTRUCTIONS END*********
+
 	//***********CREATE CURSOR***********
 
 	//create cursor
-	string CURSORpath = s_cwd_images + "/cursor.png";
+	string CURSORpath = s_cwd_images + "/cursor2.png";
 
 	//create a SDL surfgace tohold the cursor image
 	surface = IMG_Load(CURSORpath.c_str());
@@ -313,6 +456,18 @@ int main(int argc, char* argv[]) {
 				SDL_RenderCopy(renderer, bkgd1, NULL, &bkgd1Pos);
 				//Draw the bkgd image
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+				//Draw the title image
+				SDL_RenderCopy(renderer, title, NULL, &titlePos);
+				//Draw the players1 image
+				SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
+				//SDL_RenderCopy(renderer, players1down, NULL, &players1Pos);
+				//Draw the players2 image
+				SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
+				//SDL_RenderCopy(renderer, players2down, NULL, &players2downPos);
+				SDL_RenderCopy(renderer, instructN, NULL, &instructNPos);
+								//SDL_RenderCopy(renderer, instructdown, NULL, &instructdownPos);
+				SDL_RenderCopy(renderer, quitN, NULL, &quitNPos);
+								//SDL_RenderCopy(renderer, quitdown, NULL, &quitdownPos);
 
 
 				//draw cursor
