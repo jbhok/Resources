@@ -10,6 +10,13 @@
 #if defined(__linux__)
 
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+
+#endif
+
+#if defined(__linux__)
+
+#include <unistd.h>
 
 #endif
 
@@ -93,6 +100,11 @@ int main(int argc, char* argv[]) {
 #if defined(__linux__)
 	cout <<"Running on Linux" <<endl;
 	cout <<" Added on Linux :)"<<endl;
+
+	string s_cwd(getcwd(NULL, 0));
+		//create a string linking to the mac's images folder
+		string s_cwd_images = s_cwd + "/Resources/Images/";
+
 #endif
 
 #if defined(_WIN32) || (_WIN64)
@@ -413,15 +425,15 @@ int main(int argc, char* argv[]) {
 
 	string padpath = s_cwd_images + "/playagaindown.png";
 
-		surface = IMG_Load(padpath.c_str());
+	surface = IMG_Load(padpath.c_str());
 
-		//create a SDL texture
-		SDL_Texture*pAgaindown;
+	//create a SDL texture
+	SDL_Texture*pAgaindown;
 
-		//place surgace info into the texture bkgd1
-		pAgaindown=SDL_CreateTextureFromSurface(renderer, surface);
+	//place surgace info into the texture bkgd1
+	pAgaindown=SDL_CreateTextureFromSurface(renderer, surface);
 
-		SDL_FreeSurface(surface);
+	SDL_FreeSurface(surface);
 
 	SDL_Rect pAgainPos;
 	//set the X, Y, W, and H for the Rectabngle
@@ -437,6 +449,27 @@ int main(int argc, char* argv[]) {
 	pAgaindownPos.h = 53;
 	//***** INSTRUCTINOS TITLE END********
 
+
+	//****** LOSE MENU START ******
+		string Losepath = s_cwd_images + "/lose.png";
+
+		surface = IMG_Load(Losepath.c_str());
+
+		//create a SDL texture
+		SDL_Texture*loseText;
+
+		//place surgace info into the texture bkgd1
+		loseText=SDL_CreateTextureFromSurface(renderer, surface);
+
+		SDL_FreeSurface(surface);
+
+		SDL_Rect loseTextPos;
+		//set the X, Y, W, and H for the Rectabngle
+		loseTextPos.x = 150;
+		loseTextPos.y = 150;
+		loseTextPos.w = 268;
+		loseTextPos.h = 68;
+		//***** LOSE END********
 
 	//***********CREATE CURSOR***********
 
@@ -459,10 +492,10 @@ int main(int argc, char* argv[]) {
 	cursorPos.w = 32;
 	cursorPos.h = 32;
 
-	cursorPos.x = 10;
-	cursorPos.y = 10;
-	cursorPos.w = 10;
-	cursorPos.h = 10;
+	cursorPos.x = 32;
+	cursorPos.y = 32;
+	cursorPos.w = 32;
+	cursorPos.h = 32;
 
 	//var for cursor speed
 	int cursorSpeed=400;
@@ -734,6 +767,8 @@ int main(int argc, char* argv[]) {
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 				//Draw the title image
 				SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
+				//draw cursor
+				SDL_RenderCopy(renderer, cursor, NULL, &cursorPos);
 
 				//SDL Render present
 				SDL_RenderPresent(renderer);
@@ -800,6 +835,8 @@ int main(int argc, char* argv[]) {
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 				//Draw the title image
 				SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
+				//Draw the players1 image
+				SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
 
 				//SDL Render present
 				SDL_RenderPresent(renderer);
@@ -811,7 +848,7 @@ int main(int argc, char* argv[]) {
 
 			cout << "The Game State is WIN" << endl;
 			cout << "Press the A Button for Main Menu" << endl;
-			cout << "Press the A Button for quit" << endl;
+			cout << "Press the A Button for Replay" << endl;
 			cout << endl;
 
 			while (win) {
@@ -819,6 +856,7 @@ int main(int argc, char* argv[]) {
 				thisTime=SDL_GetTicks();
 				deltaTime=(float)(thisTime-lastTime)/1000;
 				lastTime = thisTime;
+
 				//check for input events
 				if (SDL_PollEvent(&event)) {
 					//check to see if the SDL Window is closed - player clicks X in window
@@ -845,7 +883,7 @@ int main(int argc, char* argv[]) {
 									== SDL_CONTROLLER_BUTTON_A) {
 
 								win = false;
-								quit = true;
+								gameState = PLAYERS1;
 
 							}
 
@@ -853,6 +891,28 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
+				UpdateBackground();
+
+				//Clear SDL renderer
+				SDL_RenderClear(renderer);
+
+				//Draw the bkgd image
+				SDL_RenderCopy(renderer, bkgd1, NULL, &bkgd1Pos);
+
+				//Draw the bkgd image
+				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+
+				//Draw the title image
+				SDL_RenderCopy(renderer, winText, NULL, &winTextPos);
+
+				//Draw the menu image
+				SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
+
+				//Draw the playagain image
+				SDL_RenderCopy(renderer, pAgain, NULL, &pAgainPos);
+
+				//SDL Render present
+				SDL_RenderPresent(renderer);
 			}
 			break; /////////WIN CASE////////////////
 
@@ -861,7 +921,7 @@ int main(int argc, char* argv[]) {
 
 			cout << "The Game State is LOSE" << endl;
 			cout << "Press the A Button for Main Menu" << endl;
-			cout << "Press the A Button for quit" << endl;
+			cout << "Press the A Button for Replay Game" << endl;
 			cout << endl;
 
 			while (win) {
@@ -869,6 +929,7 @@ int main(int argc, char* argv[]) {
 				thisTime=SDL_GetTicks();
 				deltaTime=(float)(thisTime-lastTime)/1000;
 				lastTime = thisTime;
+
 				//check for input events
 				if (SDL_PollEvent(&event)) {
 					//check to see if the SDL Window is closed - player clicks X in window
@@ -895,7 +956,7 @@ int main(int argc, char* argv[]) {
 									== SDL_CONTROLLER_BUTTON_A) {
 
 								lose = false;
-								quit = true;
+								gameState = PLAYERS1;
 
 							}
 
@@ -903,6 +964,28 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
+				UpdateBackground();
+
+								//Clear SDL renderer
+								SDL_RenderClear(renderer);
+
+								//Draw the bkgd image
+								SDL_RenderCopy(renderer, bkgd1, NULL, &bkgd1Pos);
+
+								//Draw the bkgd image
+								SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+
+								//Draw the title image
+								SDL_RenderCopy(renderer, loseText, NULL, &loseTextPos);
+
+								//Draw the menu image
+								SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
+
+								//Draw the playagain image
+								SDL_RenderCopy(renderer, pAgain, NULL, &pAgainPos);
+
+								//SDL Render present
+								SDL_RenderPresent(renderer);
 			}
 			break; /////////END LOSE CASE////////////////
 
