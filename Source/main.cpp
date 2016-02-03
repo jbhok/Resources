@@ -44,7 +44,7 @@ int thisTime=0;
 int lastTime=0;
 
 //move the background
-void UpdateBackground(){
+void UpdateBackground(float deltaTime){
 
 	//Update
 
@@ -83,6 +83,76 @@ void UpdateBackground(){
 
 }
 
+//*************NEW**************
+//Analog joystick dead zone
+const int JOYSTICK_DEAD_ZONE = 8000;
+
+//joystick direction vars
+float xDir, yDir;
+
+//cursor float vars for movement
+float pos_X, pos_Y;
+
+//creat SDL recrangle for the player graphic
+SDL_Rect cursorPos, activePos;
+
+int cursorSpeed=400;
+
+void moveCursor(const SDL_ControllerAxisEvent event){
+
+	if(event.which ==0){
+		if(event.axis ==0){
+			if(event.value < -JOYSTICK_DEAD_ZONE){
+				xDir= -1.0f;
+			}else if(event.value > JOYSTICK_DEAD_ZONE){
+				xDir = 1.0f;
+			}else{
+				xDir = 0.0f;
+			}
+		}
+		if(event.axis == 1){
+			if(event.value < -JOYSTICK_DEAD_ZONE){
+				yDir = -1.0f;
+			}else if(event.value>JOYSTICK_DEAD_ZONE){
+				yDir = 1.0f;
+			}else {
+				yDir = 0.0f;
+			}
+		}
+	}
+}
+
+void UpdateCursor(float deltaTime){
+	pos_X += (cursorSpeed * xDir) *deltaTime;
+	pos_Y += (cursorSpeed * xDir) *deltaTime;
+
+	cursorPos.x = (int) (pos_X+0.5f);
+	cursorPos.y = (int) (pos_Y+0.5f);
+
+	activePos.x = cursorPos.x;
+	activePos.y = cursorPos.y;
+
+	if(cursorPos.x<0){
+		cursorPos.x = 0;
+		pos_X = cursorPos.x;
+	}
+	if(cursorPos.x > 1024 - cursorPos.w){
+		cursorPos.x = 1024 - cursorPos.w;
+		pos_X = cursorPos.x;
+	}
+	if(cursorPos.y<0){
+		cursorPos.y = 0;
+		pos_Y=cursorPos.y;
+	}
+	if(cursorPos.y > 768 - cursorPos.h){
+		cursorPos.y = 768 - cursorPos.h;
+		pos_Y=cursorPos.y;
+	}
+
+
+}
+bool players1Over= false, players2Over= false, instructionsOver= false,
+		quitOver= false, menuOver=false, playerOver=false;
 
 int main(int argc, char* argv[]) {
 
@@ -102,8 +172,8 @@ int main(int argc, char* argv[]) {
 	cout <<" Added on Linux :)"<<endl;
 
 	string s_cwd(getcwd(NULL, 0));
-		//create a string linking to the mac's images folder
-		string s_cwd_images = s_cwd + "/Resources/Images/";
+	//create a string linking to the mac's images folder
+	string s_cwd_images = s_cwd + "/Resources/Images/";
 
 #endif
 
@@ -451,25 +521,25 @@ int main(int argc, char* argv[]) {
 
 
 	//****** LOSE MENU START ******
-		string Losepath = s_cwd_images + "/lose.png";
+	string Losepath = s_cwd_images + "/lose.png";
 
-		surface = IMG_Load(Losepath.c_str());
+	surface = IMG_Load(Losepath.c_str());
 
-		//create a SDL texture
-		SDL_Texture*loseText;
+	//create a SDL texture
+	SDL_Texture*loseText;
 
-		//place surgace info into the texture bkgd1
-		loseText=SDL_CreateTextureFromSurface(renderer, surface);
+	//place surgace info into the texture bkgd1
+	loseText=SDL_CreateTextureFromSurface(renderer, surface);
 
-		SDL_FreeSurface(surface);
+	SDL_FreeSurface(surface);
 
-		SDL_Rect loseTextPos;
-		//set the X, Y, W, and H for the Rectabngle
-		loseTextPos.x = 150;
-		loseTextPos.y = 150;
-		loseTextPos.w = 268;
-		loseTextPos.h = 68;
-		//***** LOSE END********
+	SDL_Rect loseTextPos;
+	//set the X, Y, W, and H for the Rectabngle
+	loseTextPos.x = 150;
+	loseTextPos.y = 150;
+	loseTextPos.w = 268;
+	loseTextPos.h = 68;
+	//***** LOSE END********
 
 	//***********CREATE CURSOR***********
 
@@ -485,7 +555,7 @@ int main(int argc, char* argv[]) {
 	//place surface  for cursor
 	cursor=SDL_CreateTextureFromSurface(renderer,surface);
 
-	SDL_Rect cursorPos, activePos;
+	//SDL_Rect cursorPos, activePos;
 
 	cursorPos.x = 0;
 	cursorPos.y = 0;
@@ -498,7 +568,7 @@ int main(int argc, char* argv[]) {
 	cursorPos.h = 32;
 
 	//var for cursor speed
-	int cursorSpeed=400;
+	//int cursorSpeed=400;
 
 	//****************CREATE CURSOR END*******************
 
@@ -577,39 +647,54 @@ int main(int argc, char* argv[]) {
 
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_A) {
+								if(players1Over){
 
-								menu = false;
-								gameState = INSTRUCTIONS;
+									menu = false;
+									gameState = PLAYERS1;
+									players1Over=false;
 
-							}
-							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_B) {
+								}
+								if (players2Over) {
 
-								menu = false;
-								gameState = PLAYERS1;
+									menu = false;
+									gameState = PLAYERS2;
+									players2Over=false;
 
-							}
-							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_X) {
+								}
+								if (instructionsOver) {
 
-								menu = false;
-								gameState = PLAYERS2;
+									menu = false;
+									gameState = INSTRUCTIONS;
+									instructionsOver=false;
 
-							}
-							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_Y) {
+								}
+								if (quitOver) {
 
-								menu = false;
-								quit = true;
+									menu = false;
+									quit = true;
+								quitOver=false;
+								}
 
 							}
 						}
 						break;
+						//***************** MEW ***************
+					case SDL_CONTROLLERAXISMOTION:
+
+						moveCursor(event.caxis);
+						break;
+
 					}
 				}
 
 				//Update
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
+
+				players1Over=SDL_HasIntersection(&activePos, &players1NPos);
+				players2Over=SDL_HasIntersection(&activePos, &players2NPos);
+				instructionsOver=SDL_HasIntersection(&activePos, &instructNPos);
+				quitOver = SDL_HasIntersection(&activePos, &quitNPos);
 
 				//start Drawing
 
@@ -622,16 +707,37 @@ int main(int argc, char* argv[]) {
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 				//Draw the title image
 				SDL_RenderCopy(renderer, title, NULL, &titlePos);
+
+				//*************************NEW*******************
+
 				//Draw the players1 image
-				SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
-				//SDL_RenderCopy(renderer, players1down, NULL, &players1Pos);
+				if(players1Over){
+					SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
+				}else{
+					SDL_RenderCopy(renderer, players1down, NULL, &players1NPos);
+				}
+
 				//Draw the players2 image
-				SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
-				//SDL_RenderCopy(renderer, players2down, NULL, &players2downPos);
-				SDL_RenderCopy(renderer, instructN, NULL, &instructNPos);
-				//SDL_RenderCopy(renderer, instructdown, NULL, &instructdownPos);
-				SDL_RenderCopy(renderer, quitN, NULL, &quitNPos);
-				//SDL_RenderCopy(renderer, quitdown, NULL, &quitdownPos);
+				if(players2Over){
+					SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
+				}else{
+					SDL_RenderCopy(renderer, players2down, NULL, &players2NPos);
+				}
+
+				//draw intrustionc
+				if(instructionsOver){
+					SDL_RenderCopy(renderer, instructN, NULL, &instructNPos);
+				}else{
+					SDL_RenderCopy(renderer, instructdown, NULL, &instructNPos);
+				}
+
+				//draw quit
+				if(quitOver){
+					SDL_RenderCopy(renderer, quitN, NULL, &quitNPos);
+				}else{
+					SDL_RenderCopy(renderer, quitdown, NULL, &quitNPos);}
+
+				// *****************NEW***************
 
 
 				//draw cursor
@@ -639,6 +745,7 @@ int main(int argc, char* argv[]) {
 
 				//SDL Render present
 				SDL_RenderPresent(renderer);
+
 
 			}
 			break; /////////END MENU MENU CASE////////////////
@@ -683,7 +790,8 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -755,7 +863,8 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -823,7 +932,8 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -891,7 +1001,8 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -964,28 +1075,29 @@ int main(int argc, char* argv[]) {
 						break;
 					}
 				}
-				UpdateBackground();
+				UpdateBackground(deltaTime);
+				UpdateCursor(deltaTime);
 
-								//Clear SDL renderer
-								SDL_RenderClear(renderer);
+				//Clear SDL renderer
+				SDL_RenderClear(renderer);
 
-								//Draw the bkgd image
-								SDL_RenderCopy(renderer, bkgd1, NULL, &bkgd1Pos);
+				//Draw the bkgd image
+				SDL_RenderCopy(renderer, bkgd1, NULL, &bkgd1Pos);
 
-								//Draw the bkgd image
-								SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+				//Draw the bkgd image
+				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 
-								//Draw the title image
-								SDL_RenderCopy(renderer, loseText, NULL, &loseTextPos);
+				//Draw the title image
+				SDL_RenderCopy(renderer, loseText, NULL, &loseTextPos);
 
-								//Draw the menu image
-								SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
+				//Draw the menu image
+				SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
 
-								//Draw the playagain image
-								SDL_RenderCopy(renderer, pAgain, NULL, &pAgainPos);
+				//Draw the playagain image
+				SDL_RenderCopy(renderer, pAgain, NULL, &pAgainPos);
 
-								//SDL Render present
-								SDL_RenderPresent(renderer);
+				//SDL Render present
+				SDL_RenderPresent(renderer);
 			}
 			break; /////////END LOSE CASE////////////////
 
