@@ -218,6 +218,7 @@ int main(int argc, char* argv[]) {
 
 
 	Player player1 = Player(renderer, 0, s_cwd_images.c_str(), 250.0, 500.0);
+	Player player2 = Player(renderer, 2, s_cwd_images.c_str(), 750.0, 500.0);
 
 	//Create player End*************
 
@@ -602,14 +603,24 @@ int main(int argc, char* argv[]) {
 	 SDL_UpdateWindowSurface( window );
 	 */
 
-	//****set up Game Controller Variable*****
-	SDL_GameController* gGameController = NULL;
-
-	//*****open Came Controller*****
-	gGameController = SDL_GameControllerOpen(0);
 
 	//***Turn on Game Controller Events*****
 	SDL_GameControllerEventState (SDL_ENABLE);
+
+
+	//****set up Game Controller 1 Variable*****
+	SDL_GameController* gGameController0 = NULL;
+
+	//*****open Came Controller1*****
+	gGameController0 = SDL_GameControllerOpen(0);
+
+	//****set up Game Controller 2 Variable*****
+	SDL_GameController* gGameController1 = NULL;
+
+	//*****open Came Controller2*****
+	gGameController1 = SDL_GameControllerOpen(1);
+
+
 
 	//*****SDL Event to handle input****
 	SDL_Event event;
@@ -875,7 +886,7 @@ int main(int argc, char* argv[]) {
 						if (event.cdevice.which == 0) {
 
 							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_A) {
+									== SDL_CONTROLLER_BUTTON_X) {
 
 								players1 = false;
 								gameState = WIN;
@@ -883,14 +894,21 @@ int main(int argc, char* argv[]) {
 							}
 
 							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_A) {
+									== SDL_CONTROLLER_BUTTON_Y) {
 
 								players1 = false;
 								gameState = LOSE;
 
 							}
-
 						}
+
+						//send button info to player one
+						player1.OnControllerButton(event.cbutton);
+
+						break;
+
+					case SDL_CONTROLLERAXISMOTION:
+						player1.OnControllerAxis(event.caxis);
 						break;
 					}
 				}
@@ -907,7 +925,7 @@ int main(int argc, char* argv[]) {
 				//Draw the bkgd image
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 				//Draw the title image
-				SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
+				//SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
 				//draw cursor
 				//SDL_RenderCopy(renderer, cursor, NULL, &cursorPos);
 
@@ -945,10 +963,10 @@ int main(int argc, char* argv[]) {
 					switch (event.type) {
 					case SDL_CONTROLLERBUTTONDOWN:
 
-						if (event.cdevice.which == 0) {
+						if (event.cdevice.which == 0  || event.cdevice.which == 1) {
 
 							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_A) {
+									== SDL_CONTROLLER_BUTTON_X) {
 
 								players2 = false;
 								gameState = WIN;
@@ -956,19 +974,28 @@ int main(int argc, char* argv[]) {
 							}
 
 							if (event.cbutton.button
-									== SDL_CONTROLLER_BUTTON_A) {
+									== SDL_CONTROLLER_BUTTON_Y) {
 
 								players2 = false;
 								gameState = LOSE;
 
 							}
-
 						}
+						//send button info to player one
+						player1.OnControllerButton(event.cbutton);
+						//send button info to player one
+						player2.OnControllerButton(event.cbutton);
+
+						break;
+
+					case SDL_CONTROLLERAXISMOTION:
+						player2.OnControllerAxis(event.caxis);
 						break;
 					}
 				}
 				UpdateBackground(deltaTime);
-				UpdateCursor(deltaTime);
+				player1.Update(deltaTime);
+				player2.Update(deltaTime);
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -979,9 +1006,12 @@ int main(int argc, char* argv[]) {
 				//Draw the bkgd image
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
 				//Draw the title image
-				SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
+				//SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
 				//Draw the players1 image
-				SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
+				//SDL_RenderCopy(renderer, menuN, NULL, &menuNPos);
+
+				player1.Draw(renderer);
+				player2.Draw(renderer);
 
 				//SDL Render present
 				SDL_RenderPresent(renderer);
@@ -1086,7 +1116,7 @@ int main(int argc, char* argv[]) {
 			cout << "Press the A Button for Replay Game" << endl;
 			cout << endl;
 
-			while (win) {
+			while (lose) {
 
 				thisTime=SDL_GetTicks();
 				deltaTime=(float)(thisTime-lastTime)/1000;

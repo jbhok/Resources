@@ -27,12 +27,20 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <vector>
+#include "bullet.h"
 
 using namespace std;
+
+
 
 class Player{
 
 public:
+
+	//variable to hold the list of bullets
+	vector<Bullet> bulletList;
+
 	//string to hold the path to players texture
 	string playerPath;
 
@@ -76,5 +84,8 @@ public:
 
 	//Players destruction method
 	~Player();
+
+private:
+	void CreateBullet();
 
 };
