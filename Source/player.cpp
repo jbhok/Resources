@@ -75,6 +75,8 @@ void Player::CreateBullet(){
 		//see if the bullet is not active
 	if(bulletList[i].active == false){
 
+		Mix_PlayChannel(-1, laser, 0);
+
 		//set bullet to active
 		bulletList[i].active = true;
 
