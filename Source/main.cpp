@@ -4,6 +4,7 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2_image/SDL_image.h"
+#include "SDL2_mixer/SDL_mixer.h"
 
 #endif
 
@@ -11,18 +12,27 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_mixer.h"
 
+#endif
+
+
+
+#if defined(_WIN32) || (_WIN64)
+#include "SDL.h"
+#include "SDL_image.h"
+#include "SDL_mixer.h"
+#endif
+
+#if defined(_WIN32) || (_WIN64)
+#include <direct.h>
+#define get cwd _getcwd
 #endif
 
 #if defined(__linux__)
 
 #include <unistd.h>
 
-#endif
-
-#if defined(_WIN32) || (_WIN64)
-#include "SDL.h"
-#include "SDL_image.h"
 #endif
 
 #include <stdio.h>
@@ -171,6 +181,8 @@ int main(int argc, char* argv[]) {
 
 	cout << s_cwd_images << endl;
 
+	string s_cwd_audio = s_cwd + "/Resources/Audio/";
+
 #endif
 
 #if defined(__linux__)
@@ -180,11 +192,15 @@ int main(int argc, char* argv[]) {
 	string s_cwd(getcwd(NULL, 0));
 	//create a string linking to the mac's images folder
 	string s_cwd_images = s_cwd + "/Resources/Images/";
+	string s_cwd_audio = s_cwd + "/Resources/Audio/";
 
 #endif
 
 #if defined(_WIN32) || (_WIN64)
 	cout <<"Running on Windows" <<endl;
+	string s_cwd(getcwd(NULL, 0));
+	string s_cwd_images = s_cwd + "\\Resources\\Images\\";
+	string s_cwd_audio = s_cwd + "\\Resources\\Audio\\";
 
 #endif
 
@@ -214,13 +230,7 @@ int main(int argc, char* argv[]) {
 	//create the renderer
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	//CREATE PLAYER START**************************
 
-
-	Player player1 = Player(renderer, 0, s_cwd_images.c_str(), 250.0, 500.0);
-	Player player2 = Player(renderer, 2, s_cwd_images.c_str(), 750.0, 500.0);
-
-	//Create player End*************
 
 
 
@@ -636,11 +646,49 @@ int main(int argc, char* argv[]) {
 	//boolean values to control movement through the states
 	bool menu, instructions, players1, players2, win, lose, quit;
 
+
+
+	//========================AUDIO===============================
+
+	//open audio channel
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+
+	//load a music file
+	Mix_Music *bgm = Mix_LoadMUS((s_cwd_audio + "Vir_Nocturna_-_Meta.mp3").c_str());
+
+	//if music file isnt' playing, play it
+	if(!Mix_PlayingMusic())
+		Mix_PlayMusic(bgm, -1);
+
+	//set up sound effect chunk for the button over state
+	Mix_Chunk *overSound = Mix_LoadWAV((s_cwd_audio + "over.wav").c_str());
+
+	//set up sound effect Chunk for the button pressed state
+	Mix_Chunk *pressedSound = Mix_LoadWAV((s_cwd_audio + "down.wav").c_str());
+
+	//bool value to control the other sound effect and the buttons
+	bool alreadyOver =false;
+
+	//================ END AUDIO=========================
+
+	//CREATE PLAYER START**************************
+
+
+		Player player1 = Player(renderer, 0, s_cwd_images.c_str(), s_cwd_audio.c_str(), 250.0, 500.0);
+		Player player2 = Player(renderer, 2, s_cwd_images.c_str(), s_cwd_audio.c_str(), 750.0, 500.0);
+
+		//Create player End*************
+
+
+
 	//the window is open: could enter program loop here(see SDL_PollEvent())
 	while (!quit) {
 		switch (gameState) {
 		////////////////CASE ONE//////////////
 		case MENU:
+
+			alreadyOver= false;
+
 			menu = true;
 /*
 			cout << "The Game State Menu" << endl;
@@ -676,28 +724,33 @@ int main(int argc, char* argv[]) {
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_A) {
 								if(players1Over){
-
+									//play the otver sound- plays fine through levels but must pause/ delay for quit
+									Mix_PlayChannel(-1, pressedSound, 0);
 									menu = false;
 									gameState = PLAYERS1;
 									players1Over=false;
 
 								}
 								if (players2Over) {
-
+									//play the otver sound- plays fine through levels but must pause/ delay for quit
+									Mix_PlayChannel(-1, pressedSound, 0);
 									menu = false;
 									gameState = PLAYERS2;
 									players2Over=false;
 
 								}
 								if (instructionsOver) {
-
+									//play the otver sound- plays fine through levels but must pause/ delay for quit
+									Mix_PlayChannel(-1, pressedSound, 0);
 									menu = false;
 									gameState = INSTRUCTIONS;
 									instructionsOver=false;
 
 								}
 								if (quitOver) {
-
+									//play the otver sound- plays fine through levels but must pause/ delay for quit
+									Mix_PlayChannel(-1, pressedSound, 0);
+									SDL_Delay(200);
 									menu = false;
 									quit = true;
 									quitOver=false;
@@ -717,12 +770,29 @@ int main(int argc, char* argv[]) {
 
 				//Update
 				UpdateBackground(deltaTime);
+
 				UpdateCursor(deltaTime);
 
 				players1Over=SDL_HasIntersection(&activePos, &players1NPos);
 				players2Over=SDL_HasIntersection(&activePos, &players2NPos);
 				instructionsOver=SDL_HasIntersection(&activePos, &instructNPos);
 				quitOver = SDL_HasIntersection(&activePos, &quitNPos);
+
+				//if the curosr is over a button play the over sound
+
+				if(players1Over || players2Over || instructionsOver || quitOver){
+					if(alreadyOver == false){
+						Mix_PlayChannel(-1, overSound, 0);
+						alreadyOver= true;
+					}
+
+				}
+
+				//if the cursor is not over any button, reset the alreadyOver var
+				if(!players1Over && !players2 && !instructionsOver && !quitOver){
+					alreadyOver = false;
+				}
+
 
 				//start Drawing
 
@@ -779,6 +849,9 @@ int main(int argc, char* argv[]) {
 			break; /////////END MENU MENU CASE////////////////
 
 		case INSTRUCTIONS:
+
+			alreadyOver= false;
+
 			instructions = true;
 
 			//cout << "The Game State is Instructions" << endl;
@@ -810,6 +883,7 @@ int main(int argc, char* argv[]) {
 									== SDL_CONTROLLER_BUTTON_A) {
 
 								if(menuOver){
+									Mix_PlayChannel(-1, pressedSound, 0);
 									instructions=false;
 									gameState=MENU;
 									menuOver=false;
@@ -829,6 +903,19 @@ int main(int argc, char* argv[]) {
 
 				//check for cursor intersection with menubuton
 				menuOver= SDL_HasIntersection(&activePos, &menuNPos);
+
+				if(menuOver){
+					if(alreadyOver == false){
+						Mix_PlayChannel(-1, overSound, 0);
+						alreadyOver= true;
+					}
+
+				}
+
+				//if the cursor is not over any button, reset the alreadyOver var
+				if(!menuOver){
+					alreadyOver = false;
+				}
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -858,6 +945,9 @@ int main(int argc, char* argv[]) {
 			break; /////////END INSTRUCTINOS CASE////////////////
 
 		case PLAYERS1:
+
+			alreadyOver= false;
+
 			players1 = true;
 
 			/*cout << "The Game State is 1P" << endl;
@@ -887,7 +977,7 @@ int main(int argc, char* argv[]) {
 
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_X) {
-
+								//Mix_PlayChannel(-1, overSound, 0);
 								players1 = false;
 								gameState = WIN;
 
@@ -895,7 +985,7 @@ int main(int argc, char* argv[]) {
 
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_Y) {
-
+								//Mix_PlayChannel(-1, overSound, 0);
 								players1 = false;
 								gameState = LOSE;
 
@@ -915,6 +1005,8 @@ int main(int argc, char* argv[]) {
 				UpdateBackground(deltaTime);
 
 				player1.Update(deltaTime);
+
+
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -938,6 +1030,9 @@ int main(int argc, char* argv[]) {
 			break; /////////END P1 CASE////////////////
 
 		case PLAYERS2:
+
+			alreadyOver= false;
+
 			players2 = true;
 
 			cout << "The Game State is 2P" << endl;
@@ -967,7 +1062,7 @@ int main(int argc, char* argv[]) {
 
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_X) {
-
+								//Mix_PlayChannel(-1, overSound, 0);
 								players2 = false;
 								gameState = WIN;
 
@@ -975,7 +1070,7 @@ int main(int argc, char* argv[]) {
 
 							if (event.cbutton.button
 									== SDL_CONTROLLER_BUTTON_Y) {
-
+								//Mix_PlayChannel(-1, overSound, 0);
 								players2 = false;
 								gameState = LOSE;
 
@@ -996,6 +1091,7 @@ int main(int argc, char* argv[]) {
 				UpdateBackground(deltaTime);
 				player1.Update(deltaTime);
 				player2.Update(deltaTime);
+
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -1019,6 +1115,9 @@ int main(int argc, char* argv[]) {
 			break; /////////END P2 CASE////////////////
 
 		case WIN:
+
+			alreadyOver= false;
+
 			win = true;
 
 			cout << "The Game State is WIN" << endl;
@@ -1048,7 +1147,7 @@ int main(int argc, char* argv[]) {
 							if(event.cbutton.button == SDL_CONTROLLER_BUTTON_A){
 
 								if (menuOver) {
-
+									Mix_PlayChannel(-1, overSound, 0);
 									win = false;
 									gameState = MENU;
 									menuOver=false;
@@ -1056,7 +1155,7 @@ int main(int argc, char* argv[]) {
 								}
 
 								if (playOver) {
-
+									Mix_PlayChannel(-1, overSound, 0);
 									win = false;
 									gameState = PLAYERS1;
 									playOver=false;
@@ -1077,6 +1176,19 @@ int main(int argc, char* argv[]) {
 
 				menuOver= SDL_HasIntersection(&activePos,&menuNPos);
 				playOver=SDL_HasIntersection(&activePos, &pAgainPos);
+
+				if(menuOver || playOver){
+					if(alreadyOver == false){
+						Mix_PlayChannel(-1, overSound, 0);
+						alreadyOver= true;
+					}
+
+				}
+
+				//if the cursor is not over any button, reset the alreadyOver var
+				if(!menuOver && !playOver){
+					alreadyOver = false;
+				}
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -1109,6 +1221,9 @@ int main(int argc, char* argv[]) {
 			break; /////////WIN CASE////////////////
 
 		case LOSE:
+
+			alreadyOver= false;
+
 			lose = true;
 
 			cout << "The Game State is LOSE" << endl;
@@ -1139,7 +1254,7 @@ int main(int argc, char* argv[]) {
 							if(event.cbutton.button == SDL_CONTROLLER_BUTTON_A){
 
 								if (menuOver) {
-
+									Mix_PlayChannel(-1, overSound, 0);
 									lose = false;
 									gameState = MENU;
 									menuOver=false;
@@ -1147,7 +1262,7 @@ int main(int argc, char* argv[]) {
 								}
 
 								if (playOver) {
-
+									Mix_PlayChannel(-1, overSound, 0);
 									lose = false;
 									gameState = PLAYERS1;
 									playOver=false;
@@ -1168,6 +1283,19 @@ int main(int argc, char* argv[]) {
 
 				menuOver= SDL_HasIntersection(&activePos,&menuNPos);
 				playOver=SDL_HasIntersection(&activePos, &pAgainPos);
+
+				if(menuOver || playOver){
+					if(alreadyOver == false){
+						Mix_PlayChannel(-1, overSound, 0);
+						alreadyOver= true;
+					}
+
+				}
+
+				//if the cursor is not over any button, reset the alreadyOver var
+				if(!menuOver && !playOver){
+					alreadyOver = false;
+				}
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);

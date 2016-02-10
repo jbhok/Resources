@@ -3,11 +3,15 @@
 //analog joystick dead zone
 const int JOYSTICK_DEAD_ZONE = 8000;
 
-Player::Player(SDL_Renderer *renderer, int pNum, string filePath, float x, float y)
+Player::Player(SDL_Renderer *renderer, int pNum, string filePath, string audioPath, float x, float y)
 {
 	//set the plaer number 0 or 1
 	playerNum=pNum;
+
+	//set float for player speed
 	speed = 500.0f;
+
+	laser = Mix_LoadWAV((audioPath + "laser.wav").c_str());
 
 	if(playerNum == 0){
 
@@ -65,7 +69,7 @@ Player::Player(SDL_Renderer *renderer, int pNum, string filePath, float x, float
 }
 //create a bullet
 void Player::CreateBullet(){
-	//see if there is abullet active to fire
+	//see if there is a bullet active to fire
 	for(int i = 0; i < bulletList.size(); i++){
 
 		//see if the bullet is not active
@@ -78,9 +82,9 @@ void Player::CreateBullet(){
 		//to the center of the player using player width
 		bulletList[i].posRect.x = (pos_X + (posRect.w/2));
 
-		//finish alingning to the player center using the texgture width
+		//finish aligning to the player center using the texture width
 		bulletList[i].posRect.x = (bulletList[i].posRect.x -(bulletList[i].posRect.w/2));
-		bulletList[i].posRect.y=posRect.y;
+		bulletList[i].posRect.y = posRect.y;
 
 		//set the x and y position of the bullets float positons
 		bulletList[i].pos_X = pos_X;

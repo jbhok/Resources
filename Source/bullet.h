@@ -12,11 +12,11 @@
 
 #endif
 
-#if defined(__linux__)
+//#if defined(__linux__)
 
-#include <unistd.h>
+//#include <unistd.h>
 
-#endif
+//#endif
 
 #if defined(_WIN32) || (_WIN64)
 #include "SDL.h"

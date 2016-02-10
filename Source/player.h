@@ -4,6 +4,8 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2_image/SDL_image.h"
+#include "SDL2_mixer/SDL_mixer.h"
+#include "SDL2_ttf/SDL_ttf.h"
 
 #endif
 
@@ -11,32 +13,39 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_mixer.h"
+#include "SDL2/SDL_ttf.h"
 
 #endif
 
-#if defined(__linux__)
-
-#include <unistd.h>
-
-#endif
+//#if defined(__linux__)
+//#include <unistd.h>
+//#endif
 
 #if defined(_WIN32) || (_WIN64)
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
+#include "SDL_ttf.h"
+
 #endif
 
 #include <stdio.h>
 #include <iostream>
-#include <vector>
-#include "bullet.h"
+#include <sstream>
 
 using namespace std;
 
+#include <vector>
+#include "bullet.h"
 
 
 class Player{
 
 public:
+
+	//audio sound effect - CHUNK
+	Mix_Chunk *laser;
 
 	//variable to hold the list of bullets
 	vector<Bullet> bulletList;
@@ -68,7 +77,7 @@ public:
 
 	//players creation method using passed in values for renderer plater number path to the texure
 	//staring position x starting position y
-	Player(SDL_Renderer *renderer, int pNum, string filePath, float x, float y);
+	Player(SDL_Renderer *renderer, int pNum, string filePath, string audioPath, float x, float y);
 
 	//method to allo the plaer to mocve via joystick acis
 	void OnControllerAxis(const SDL_ControllerAxisEvent event);

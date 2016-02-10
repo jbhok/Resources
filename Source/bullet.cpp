@@ -9,7 +9,8 @@ Bullet::Bullet(SDL_Renderer *renderer, string filePath, float x, float y){
 	speed = 800.0;
 
 	//loat the rexture to a suraface
-	SDL_Surface *surface = IMG_Load(filePath.str());
+
+	SDL_Surface *surface = IMG_Load(filePath.c_str());
 
 	//create the rexture from the passed renderer and created surfacess
 	texture= SDL_CreateTextureFromSurface(renderer, surface);
