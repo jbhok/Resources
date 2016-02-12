@@ -161,13 +161,30 @@ void UpdateCursor(float deltaTime){
 
 
 }
+
+
+//variables for all menu button over
 bool players1Over= false, players2Over= false, instructionsOver= false,
 		quitOver= false, menuOver=false, playOver=false;
 
+//new
+
+//new
+
 //class header includes
 #include "player.h"
+#include "enemy.h"
+#include <vector>
+#include<stdlib.h>
+#include<time.h>
+
+//variable to hold the list of enemies
+vector<Enemy> enemyList;
 
 int main(int argc, char* argv[]) {
+
+	//initialize random speed
+	srand (time(NULL));
 
 #if defined(__APPLE__)
 	cout << "Running on Apple" << endl;
@@ -946,10 +963,21 @@ int main(int argc, char* argv[]) {
 
 		case PLAYERS1:
 
-			alreadyOver= false;
+			//alreadyOver= false;
+			enemyList.clear();
 
 			players1 = true;
 
+			//create the enemy pool -6
+			for(int i =0; i<6; i++){
+
+				//creat the enemy
+				Enemy tmpEnemy(renderer, s_cwd_images);
+
+				// add to the enemylist
+				enemyList.push_back(tmpEnemy);
+
+			}
 			/*cout << "The Game State is 1P" << endl;
 			cout << "Press the A Button for WIN" << endl;
 			cout << "Press the A Button for LOSE" << endl;
@@ -1004,9 +1032,14 @@ int main(int argc, char* argv[]) {
 				}
 				UpdateBackground(deltaTime);
 
-				player1.Update(deltaTime);
+				player1.Update(deltaTime, renderer);
 
+				//update the enemys
+				for(int i =0; i < enemyList.size(); i++){
 
+					//update enemy
+					enemyList[i].Update(deltaTime);
+				}
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -1016,6 +1049,13 @@ int main(int argc, char* argv[]) {
 
 				//Draw the bkgd image
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+
+				//update the enemys
+				for(int i =0; i < enemyList.size(); i++){
+
+					//update enemy
+					enemyList[i].Draw(renderer);
+				}
 				//Draw the title image
 				//SDL_RenderCopy(renderer, players1N, NULL, &players1NPos);
 				//draw cursor
@@ -1031,14 +1071,27 @@ int main(int argc, char* argv[]) {
 
 		case PLAYERS2:
 
-			alreadyOver= false;
+			//clear out any old enemies
+			enemyList.clear();
+
+			//alreadyOver= false;
 
 			players2 = true;
 
-			cout << "The Game State is 2P" << endl;
+			//create the enemy pool -6
+			for(int i =0; i<12; i++){
+
+				//creat the enemy
+				Enemy tmpEnemy(renderer, s_cwd_images);
+
+				// add to the enemylist
+				enemyList.push_back(tmpEnemy);
+
+			}
+			/*cout << "The Game State is 2P" << endl;
 			cout << "Press the A Button for WIN" << endl;
 			cout << "Press the A Button for LOSE" << endl;
-			cout << endl;
+			cout << endl;*/
 
 			while (players2) {
 
@@ -1089,9 +1142,16 @@ int main(int argc, char* argv[]) {
 					}
 				}
 				UpdateBackground(deltaTime);
-				player1.Update(deltaTime);
-				player2.Update(deltaTime);
 
+				player1.Update(deltaTime, renderer);
+				player2.Update(deltaTime, renderer);
+
+				//create the enemy pool -6
+				for(int i =0; i< enemyList.size(); i++){
+
+					// add to the enemylist
+					enemyList[i].Update(deltaTime);
+				}
 
 				//Clear SDL renderer
 				SDL_RenderClear(renderer);
@@ -1101,6 +1161,14 @@ int main(int argc, char* argv[]) {
 
 				//Draw the bkgd image
 				SDL_RenderCopy(renderer, bkgd2, NULL, &bkgd2Pos);
+
+				//draw the enemies
+				for(int i = 0; i <enemyList.size(); i++)
+				{
+					//update enemy
+					enemyList[i].Draw(renderer);
+				}
+
 				//Draw the title image
 				//SDL_RenderCopy(renderer, players2N, NULL, &players2NPos);
 				//Draw the players1 image

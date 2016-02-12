@@ -44,6 +44,31 @@ class Player{
 
 public:
 
+	//player score and lives vars
+	int playerScore, oldScore, playerLives, oldLives;
+
+	//variable for what font t use
+	TTF_Font *font;
+
+	//font color var
+	SDL_Color colorP1 = {0, 255, 0, 255};
+
+	//font color var
+	SDL_Color colorP2 = {0, 0, 255, 255};
+
+	//surface for player score andp layer lives
+	SDL_Surface *scoreSurface, *livesSurface;
+
+	//textures for the player score and player lives
+	SDL_Texture *scoreTexture, *livesTexture;
+
+	//SDL_Rects for the player score and lives textures
+	SDL_Rect scorePos, livesPos;
+
+	//strings to hold the temp vlaues of player lives and player score
+	string tempScore, tempLives;
+
+
 	//audio sound effect - CHUNK
 	Mix_Chunk *laser;
 
@@ -86,13 +111,19 @@ public:
 	void OnControllerButton(const SDL_ControllerButtonEvent event);
 
 	//update the lpayer sing the passed in deltatime
-	void Update(float deltaTime);
+	void Update(float deltaTime, SDL_Renderer *renderer);
 
 	//draw he players main passed in renderer
 	void Draw(SDL_Renderer *renderer);
 
 	//Players destruction method
 	~Player();
+
+	//update score method
+	void UpdateScore(SDL_Renderer *renderer);
+
+	//update score method
+	void UpdateLives(SDL_Renderer *renderer);
 
 private:
 	void CreateBullet();

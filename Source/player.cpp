@@ -13,6 +13,39 @@ Player::Player(SDL_Renderer *renderer, int pNum, string filePath, string audioPa
 
 	laser = Mix_LoadWAV((audioPath + "laser.wav").c_str());
 
+	//init score and lives cars
+	oldScore = 0;
+	playerScore = 0;
+	oldLives = 0;
+	playerLives = 3;
+
+	//init the font system
+	TTF_Init();
+
+	//loaf the font
+	font = TTF_OpenFont((audioPath+"Arial Bold Italic.ttf").c_str(), 40);
+
+	//see if this is player 1 or 2 and create the correct x an y locations
+	if(playerNum==0){
+		scorePos.x = scorePos.y= 10;
+		livesPos.x = 10;
+		livesPos.y = 40;
+
+	}else{
+		//create the score texture x and y positions
+		scorePos.x = 650;
+		scorePos.y = 10;
+		livesPos.x = 650;
+		livesPos.y = 40;
+	}
+
+	//update score method
+	UpdateScore(renderer);
+
+	//update score method
+	UpdateLives(renderer);
+
+
 	if(playerNum == 0){
 
 		playerPath = filePath + "p1.png";
@@ -106,7 +139,10 @@ void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
 		//if A button
 		if(event.button == 0){
 
-			cout << "Player 1 - button A" << endl;
+			//cout << "Player 1 - button A" << endl;
+			playerScore += 10;
+
+			playerLives -= 1;
 
 			//create bullet
 			CreateBullet();
@@ -121,7 +157,10 @@ void Player::OnControllerButton(const SDL_ControllerButtonEvent event){
 		// if A button
 		if(event.button == 0){
 
-			cout << "Player 2 - button A" << endl;
+			//cout << "Player 2 - button A" << endl;
+			playerScore +=10;
+
+			playerLives -= 1;
 
 			//create bullet
 			CreateBullet();
@@ -207,8 +246,76 @@ void Player::OnControllerAxis(const SDL_ControllerAxisEvent event){
 
 }
 
+//update lives
+void Player::UpdateLives(SDL_Renderer *renderer){
 
-void Player::Update(float deltaTime){
+	//fix for to_string problesm on linux
+	string Result;
+	ostringstream convert;
+	convert << playerLives;
+	Result = convert.str();
+
+	//ceate the text fo the font texutre
+	tempLives = "Player Lives: " + Result;
+
+	if(playerNum == 0){
+		//place the player 1 score info into a surface
+		livesSurface = TTF_RenderText_Solid(font, tempLives.c_str(), colorP1);
+	}else{
+		//place the player 1 score into a surface
+		livesSurface = TTF_RenderText_Solid(font, tempLives.c_str(), colorP2);
+
+	}
+	//create the plyer score texture
+	livesTexture = SDL_CreateTextureFromSurface(renderer, livesSurface);
+
+	//get the width and height of the teuxtre
+	SDL_QueryTexture(livesTexture, NULL, NULL, &livesPos.w, &livesPos.h);
+
+	//free surface
+	SDL_FreeSurface(livesSurface);
+
+	//set old score
+	oldLives = playerLives;
+
+}
+
+//update score
+void Player::UpdateScore(SDL_Renderer *renderer){
+
+	//fix for to_string problesm on linux
+	string Result;
+	ostringstream convert;
+	convert << playerScore;
+	Result = convert.str();
+
+	//ceate the text fo the font texutre
+	tempScore = "Player Score: " + Result;
+
+	if(playerNum == 0){
+		//place the player 1 score info into a surface
+		scoreSurface = TTF_RenderText_Solid(font, tempScore.c_str(), colorP1);
+	}else{
+		//place the player 1 score into a surface
+		scoreSurface = TTF_RenderText_Solid(font, tempScore.c_str(), colorP2);
+
+	}
+	//create the plyer score texture
+	scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
+
+	//get the width and height of the teuxtre
+	SDL_QueryTexture(scoreTexture, NULL, NULL, &scorePos.w, &scorePos.h);
+
+	//free surface
+	SDL_FreeSurface(scoreSurface);
+
+	//set old score
+	oldScore = playerScore;
+
+}
+
+//[player update method
+void Player::Update(float deltaTime, SDL_Renderer *renderer){
 
 	pos_X += (speed * xDir) * deltaTime;
 	pos_Y += (speed * yDir) * deltaTime;
@@ -235,6 +342,7 @@ void Player::Update(float deltaTime){
 
 	//Update the players bullets
 	for(int i = 0; i < bulletList.size(); i++){
+
 		if(bulletList[i].active){
 
 		bulletList[i].Update(deltaTime);
@@ -242,7 +350,19 @@ void Player::Update(float deltaTime){
 		}
 
 	}
+	//should score be updated?
+	if( playerScore != oldScore ){
 
+		UpdateScore(renderer);
+
+	}
+
+	//should lives be updated?
+		if( playerLives != oldLives){
+
+			UpdateLives(renderer);
+
+		}
 }
 //player draw method
 void Player::Draw(SDL_Renderer *renderer){
@@ -258,6 +378,11 @@ void Player::Draw(SDL_Renderer *renderer){
 		}
 	}
 
+	//draw the okayer score
+	SDL_RenderCopy(renderer, scoreTexture, NULL, &scorePos);
+
+	//draw the okayer score
+	SDL_RenderCopy(renderer, livesTexture, NULL, &livesPos);
 }
 
 Player::~Player(){
